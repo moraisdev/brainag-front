@@ -1,70 +1,94 @@
-# Getting Started with Create React App
+🌾 Farm Producer Management Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Este é o frontend da aplicação Farm Producer Management, construída com React e integrada a uma API FastAPI (backend) para gerenciar produtores rurais.
 
-## Available Scripts
+Este frontend exibe uma lista de produtores, permite adicionar e remover produtores e visualiza dados no dashboard.
 
-In the project directory, you can run:
+🛠 Tecnologias Utilizadas
 
-### `npm start`
+	•	React: Biblioteca JavaScript para construção da interface de usuário.
+	•	Axios: Utilizada para realizar requisições HTTP à API.
+	•	Docker: Containerização do frontend.
+	•	NGINX: Servidor web para servir o aplicativo React em produção.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+🚀 Como Rodar o Frontend e Backend Juntos com Docker
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Este projeto foi projetado para rodar junto com o backend da API FastAPI usando Docker Compose.
 
-### `npm test`
+Passo 1: Estrutura de Diretórios
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Certifique-se de que sua estrutura de projetos esteja assim:
+```
+/backend               # Diretório do backend FastAPI
+  /Dockerfile          # Dockerfile do backend
+  /app
+    /...
 
-### `npm run build`
+/frontend              # Diretório do frontend React (este projeto)
+  /Dockerfile          # Dockerfile do frontend
+  /src
+    /...
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+/docker-compose.yml    # Arquivo docker-compose para rodar ambos os projetos
+````
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Passo 2: Configurar o docker-compose.yml
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Na raiz do diretório (onde backend e frontend estão localizados), crie um arquivo docker-compose.yml com o seguinte conteúdo:
+```
+version: "3.9"
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"  # Porta do backend
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://user:password@db/producers_db
+    restart: always
 
-### `npm run eject`
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"  # Porta do frontend (React)
+    depends_on:
+      - backend
+    restart: always
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=producers_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+volumes:
+  postgres_data:
+````
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Passo 3: Rodar os Serviços
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Na raiz do diretório que contém o docker-compose.yml, rode o seguinte comando:
 
-## Learn More
+docker-compose up --build
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Este comando vai:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+	•	Backend (FastAPI): Rodar na porta 8000.
+	•	Frontend (React): Rodar na porta 3000, servido pelo NGINX.
+	•	Banco de Dados (PostgreSQL): Rodar na porta 5432.
 
-### Code Splitting
+Passo 4: Acessar a Aplicação
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+	•	O frontend estará disponível em: http://localhost:3000
+	•	O backend FastAPI estará disponível em: http://localhost:8000
 
-### Analyzing the Bundle Size
+Passo 5: Documentação da API
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+A documentação da API do FastAPI pode ser acessada em: http://localhost:8000/docs
